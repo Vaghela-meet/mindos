@@ -28,10 +28,12 @@ def ensure_dev_user(db: Session, user_id: int = 1) -> User:
     """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
+        email = "developer@mindos.local" if user_id == 1 else f"developer_{user_id}@mindos.local"
+        name = "Development User" if user_id == 1 else f"Development User {user_id}"
         user = User(
             id=user_id,
-            email="developer@mindos.local",
-            name="Development User",
+            email=email,
+            name=name,
             timezone="UTC",
         )
         db.add(user)

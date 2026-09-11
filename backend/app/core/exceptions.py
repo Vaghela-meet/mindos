@@ -16,3 +16,15 @@ class GoalHasActiveTasksException(DomainException):
 
 class TaskNotFoundException(DomainException):
     pass
+
+
+class AvailabilityNotFoundException(DomainException):
+    pass
+
+
+class AvailabilityValidationException(DomainException):
+    pass
+
+
+class AvailabilityConflictException(DomainException):
+    pass

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import App from './App'
 import * as apiClient from '@/api/client'
 
@@ -33,19 +33,45 @@ const mockTasks = [
   },
 ]
 
+const mockAvailabilities = [
+  {
+    id: 101,
+    user_id: 1,
+    day_of_week: 'MONDAY' as const,
+    start_time: '09:00:00',
+    end_time: '12:00:00',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 102,
+    user_id: 1,
+    day_of_week: 'MONDAY' as const,
+    start_time: '14:00:00',
+    end_time: '18:00:00',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+]
+
 vi.mock('@/api/client', () => ({
   getGoals: vi.fn(),
   getTasks: vi.fn(),
   createGoal: vi.fn(),
   createTask: vi.fn(),
   updateTask: vi.fn(),
+  getAvailabilities: vi.fn(),
+  createAvailability: vi.fn(),
+  updateAvailability: vi.fn(),
+  deleteAvailability: vi.fn(),
 }))
 
-describe('MindOS M1 App Shell', () => {
+describe('MindOS App Shell', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(apiClient.getGoals).mockResolvedValue(mockGoals)
     vi.mocked(apiClient.getTasks).mockResolvedValue(mockTasks)
+    vi.mocked(apiClient.getAvailabilities).mockResolvedValue(mockAvailabilities)
 
     global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve({
@@ -56,7 +82,7 @@ describe('MindOS M1 App Shell', () => {
             app: 'MindOS',
             version: '0.1.0',
             environment: 'development',
-            database: { status: 'disconnected', database: 'postgresql' },
+            database: { status: 'connected', database: 'postgresql' },
           }),
       })
     )
@@ -65,7 +91,7 @@ describe('MindOS M1 App Shell', () => {
   it('renders application brand and M1 heading', async () => {
     render(<App />)
     expect(screen.getByText('MindOS')).toBeInTheDocument()
-    expect(screen.getByText(/Goals • Tasks Management/i)).toBeInTheDocument()
+    expect(screen.getByText(/Goals & Tasks Management/i)).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('Backend Integration Status')).toBeInTheDocument()
     })
@@ -89,5 +115,23 @@ describe('MindOS M1 App Shell', () => {
       expect(screen.getByText('New Goal')).toBeInTheDocument()
       expect(screen.getByText('New Task')).toBeInTheDocument()
     })
+  })
+
+  it('navigates to Weekly Availability tab and displays availability windows', async () => {
+    render(<App />)
+
+    // Click "Weekly Availability" tab
+    const tabButton = screen.getByRole('button', { name: /Weekly Availability/i })
+    fireEvent.click(tabButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Weekly Availability Capacity')).toBeInTheDocument()
+      expect(screen.getByText('Weekly Work Capacity')).toBeInTheDocument()
+      expect(screen.getByText('7h / week')).toBeInTheDocument()
+    })
+
+    // Verify Monday windows are displayed
+    expect(screen.getByText('09:00 – 12:00')).toBeInTheDocument()
+    expect(screen.getByText('14:00 – 18:00')).toBeInTheDocument()
   })
 })

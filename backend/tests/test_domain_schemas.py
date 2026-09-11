@@ -80,3 +80,49 @@ def test_task_schema_rejects_invalid_enums():
 
     with pytest.raises(ValidationError):
         TaskCreate(goal_id=1, title="Test", priority="URGENT")
+
+
+def test_availability_schema_valid():
+    """Verify AvailabilityCreate accepts valid time windows."""
+    from datetime import time
+    from app.models.availability import DayOfWeek
+    from app.schemas.availability import AvailabilityCreate, AvailabilityUpdate
+
+    avail = AvailabilityCreate(
+        day_of_week=DayOfWeek.MONDAY,
+        start_time=time(9, 0),
+        end_time=time(17, 0),
+    )
+    assert avail.day_of_week == DayOfWeek.MONDAY
+    assert avail.start_time == time(9, 0)
+    assert avail.end_time == time(17, 0)
+
+
+def test_availability_schema_rejects_equal_or_inverted_times():
+    """Verify AvailabilityCreate rejects zero or negative duration."""
+    from datetime import time
+    from app.models.availability import DayOfWeek
+    from app.schemas.availability import AvailabilityCreate, AvailabilityUpdate
+
+    # Equal
+    with pytest.raises(ValidationError):
+        AvailabilityCreate(
+            day_of_week=DayOfWeek.MONDAY,
+            start_time=time(10, 0),
+            end_time=time(10, 0),
+        )
+
+    # Inverted
+    with pytest.raises(ValidationError):
+        AvailabilityCreate(
+            day_of_week=DayOfWeek.MONDAY,
+            start_time=time(17, 0),
+            end_time=time(9, 0),
+        )
+
+    # Update inverted
+    with pytest.raises(ValidationError):
+        AvailabilityUpdate(
+            start_time=time(17, 0),
+            end_time=time(9, 0),
+        )
