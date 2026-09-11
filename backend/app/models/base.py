@@ -1,14 +1,18 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime
 from app.core.database import Base
 
 
+def utc_now():
+    return datetime.now(timezone.utc)
+
+
 class TimestampMixin:
     """Reusable mixin providing created_at and updated_at timestamps."""
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at = Column(
-        DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False,
     )

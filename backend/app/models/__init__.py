@@ -1,5 +1,18 @@
 """Database models package."""
 
 from app.models.base import Base, TimestampMixin
+from app.models.user import User
+from app.models.goal import Goal, GoalStatus, GoalPriority
+from app.models.task import Task, TaskStatus, TaskPriority
 
-__all__ = ["Base", "TimestampMixin"]
+__all__ = [
+    "Base",
+    "TimestampMixin",
+    "User",
+    "Goal",
+    "GoalStatus",
+    "GoalPriority",
+    "Task",
+    "TaskStatus",
+    "TaskPriority",
+]
