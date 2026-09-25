@@ -64,14 +64,30 @@ vi.mock('@/api/client', () => ({
   createAvailability: vi.fn(),
   updateAvailability: vi.fn(),
   deleteAvailability: vi.fn(),
+  getTodayPlan: vi.fn(),
+  generateDailyPlan: vi.fn(),
 }))
 
-describe('MindOS App Shell', () => {
+describe('MindOS Living Desk & App Shell', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(apiClient.getGoals).mockResolvedValue(mockGoals)
     vi.mocked(apiClient.getTasks).mockResolvedValue(mockTasks)
     vi.mocked(apiClient.getAvailabilities).mockResolvedValue(mockAvailabilities)
+    vi.mocked(apiClient.getTodayPlan).mockResolvedValue(null)
+    vi.mocked(apiClient.generateDailyPlan).mockResolvedValue({
+      id: 1,
+      user_id: 1,
+      plan_date: '2026-09-25',
+      status: 'ACTIVE',
+      usable_capacity_minutes: 300,
+      allocated_minutes: 90,
+      buffer_minutes: 60,
+      shortfall_minutes: 0,
+      blocks: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
 
     global.fetch = vi.fn().mockImplementation(() =>
       Promise.resolve({
@@ -88,17 +104,53 @@ describe('MindOS App Shell', () => {
     )
   })
 
-  it('renders application brand and M1 heading', async () => {
+  it('renders application brand, editorial arrival, and living desk sheet', () => {
     render(<App />)
     expect(screen.getByText('MindOS')).toBeInTheDocument()
+    expect(screen.getByText(/good morning, meetraj\./i)).toBeInTheDocument()
+    expect(screen.getByText(/24 September/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Architect MindOS Planning Engine/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText(/\[ BEGIN SESSION \]/i)).toBeInTheDocument()
+  })
+
+  it('renders humane capacity breathing room and Monday stream without telemetry formulas', () => {
+    render(<App />)
+    expect(screen.getByText(/4h 20m of unhurried focus protected today/i)).toBeInTheDocument()
+    expect(screen.getByText(/MONDAY STREAM/i)).toBeInTheDocument()
+    expect(screen.getByText(/DESK NOTE/i)).toBeInTheDocument()
+    // Verify internal telemetry jargon is not present
+    expect(screen.queryByText(/RAW AVAILABLE/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/30M GRID/i)).not.toBeInTheDocument()
+  })
+
+  it('enters Focus Mode when session is initiated and returns to workspace on exit', () => {
+    render(<App />)
+    const startButton = screen.getByRole('button', { name: /Start Focus Session/i })
+    fireEvent.click(startButton)
+
+    // Verify Focus Mode is active
+    expect(screen.getByText(/Focus Mode Active/i)).toBeInTheDocument()
+    expect(screen.getByText(/focused work/i)).toBeInTheDocument()
+    expect(screen.getByText(/Pause/i)).toBeInTheDocument()
+
+    // Click Workspace (Esc) to return
+    const exitButton = screen.getByRole('button', { name: /Workspace \(Esc\)/i })
+    fireEvent.click(exitButton)
+
+    // Back in Living Desk
+    expect(screen.getByText(/good morning, meetraj\./i)).toBeInTheDocument()
+  })
+
+  it('navigates to Goals & Tasks tab and displays goals and tasks', async () => {
+    render(<App />)
+    const goalsTabButton = screen.getByRole('button', { name: /GOALS • TASKS/i })
+    fireEvent.click(goalsTabButton)
+
     expect(screen.getByText(/Goals & Tasks Management/i)).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('Backend Integration Status')).toBeInTheDocument()
     })
-  })
 
-  it('renders goals and displays tasks for the active goal', async () => {
-    render(<App />)
     await waitFor(() => {
       const elements = screen.getAllByText('Master Architecture')
       expect(elements.length).toBeGreaterThanOrEqual(1)
@@ -109,20 +161,10 @@ describe('MindOS App Shell', () => {
     })
   })
 
-  it('provides new goal and new task action triggers', async () => {
-    render(<App />)
-    await waitFor(() => {
-      expect(screen.getByText('New Goal')).toBeInTheDocument()
-      expect(screen.getByText('New Task')).toBeInTheDocument()
-    })
-  })
-
   it('navigates to Weekly Availability tab and displays availability windows', async () => {
     render(<App />)
-
-    // Click "Weekly Availability" tab
-    const tabButton = screen.getByRole('button', { name: /Weekly Availability/i })
-    fireEvent.click(tabButton)
+    const availabilityTabButton = screen.getByRole('button', { name: /WEEKLY AVAILABILITY/i })
+    fireEvent.click(availabilityTabButton)
 
     await waitFor(() => {
       expect(screen.getByText('Weekly Availability Capacity')).toBeInTheDocument()

@@ -4,6 +4,7 @@ import { HealthCheck } from '@/components/HealthCheck'
 import { GoalsView } from '@/components/goals/GoalsView'
 import { TasksView } from '@/components/tasks/TasksView'
 import { AvailabilityView } from '@/components/availability/AvailabilityView'
+import { WorkspaceView } from '@/components/workspace/WorkspaceView'
 import { Goal, Task, GoalPriority, TaskPriority, Availability, DayOfWeek } from '@/types/domain'
 import {
   getGoals,
@@ -16,10 +17,13 @@ import {
   updateAvailability,
   deleteAvailability,
 } from '@/api/client'
-import { Sparkles, Target, CalendarDays } from 'lucide-react'
 
-export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'goals' | 'availability'>('goals')
+interface AppProps {
+  initialTab?: 'workspace' | 'goals' | 'availability'
+}
+
+export const App: React.FC<AppProps> = ({ initialTab = 'workspace' }) => {
+  const [activeTab, setActiveTab] = useState<'workspace' | 'goals' | 'availability'>(initialTab)
 
   // M1 Goals & Tasks state
   const [goals, setGoals] = useState<Goal[]>([])
@@ -144,105 +148,87 @@ export const App: React.FC = () => {
   const selectedGoal = goals.find((g) => g.id === selectedGoalId) || null
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header />
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans transition-colors duration-200">
+      <Header activeTab={activeTab} onSelectTab={setActiveTab} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
-        {/* Milestone Banner */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 p-6 shadow-2xl">
-          <div className="relative z-10 max-w-3xl space-y-2">
-            <div className="inline-flex items-center space-x-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
-              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-              <span>MindOS Domain Engine &bull; M1 Goals &bull; M2 Availability</span>
+      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-8">
+        {/* Living Workspace (Primary Experience) */}
+        {activeTab === 'workspace' && <WorkspaceView />}
+
+        {/* Goals & Tasks View (M1 Milestone) */}
+        {activeTab === 'goals' && (
+          <div className="space-y-6">
+            <div className="border-b border-border/80 pb-4">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                MindOS &bull; Milestone 1 Primitives
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl font-medium text-foreground tracking-tight mt-1">
+                Goals &amp; Tasks Management
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Execution primitives for MindOS. Tasks belong strictly to high-level Goals with conservative deletion.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              {activeTab === 'goals' ? 'Goals & Tasks Management' : 'Weekly Availability Capacity'}
-            </h1>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {activeTab === 'goals'
-                ? 'Execution primitives for MindOS. Tasks belong strictly to high-level Goals with conservative deletion protecting your progress.'
-                : 'Configurable weekly working capacity. Represents when you are generally available to execute planned tasks.'}
-            </p>
+
+            <HealthCheck />
+
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5">
+                <GoalsView
+                  goals={goals}
+                  selectedGoalId={selectedGoalId}
+                  onSelectGoal={setSelectedGoalId}
+                  onCreateGoal={handleCreateGoal}
+                  loading={loadingGoals}
+                />
+              </div>
+
+              <div className="lg:col-span-7">
+                <TasksView
+                  selectedGoal={selectedGoal}
+                  tasks={tasks}
+                  onCreateTask={handleCreateTask}
+                  onToggleComplete={handleToggleComplete}
+                  loading={loadingTasks}
+                />
+              </div>
+            </section>
           </div>
-        </div>
+        )}
 
-        {/* Backend Health Check */}
-        <section>
-          <HealthCheck />
-        </section>
-
-        {/* Domain Navigation Tabs */}
-        <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-          <button
-            onClick={() => setActiveTab('goals')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-              activeTab === 'goals'
-                ? 'bg-blue-600/20 border border-blue-500/40 text-blue-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <Target className="h-4 w-4 text-blue-400" />
-            <span>Goals &bull; Tasks</span>
-            <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full text-slate-300">
-              {goals.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('availability')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-              activeTab === 'availability'
-                ? 'bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <CalendarDays className="h-4 w-4 text-emerald-400" />
-            <span>Weekly Availability</span>
-            <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded-full text-slate-300">
-              {availabilities.length}
-            </span>
-          </button>
-        </div>
-
-        {/* Tab Views */}
-        {activeTab === 'goals' ? (
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-5">
-              <GoalsView
-                goals={goals}
-                selectedGoalId={selectedGoalId}
-                onSelectGoal={setSelectedGoalId}
-                onCreateGoal={handleCreateGoal}
-                loading={loadingGoals}
-              />
+        {/* Weekly Availability View (M2 Milestone) */}
+        {activeTab === 'availability' && (
+          <div className="space-y-6">
+            <div className="border-b border-border/80 pb-4">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                MindOS &bull; Milestone 2 Capacity
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl font-medium text-foreground tracking-tight mt-1">
+                Weekly Availability Capacity
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Configurable weekly working capacity. Represents when you are generally available to execute planned tasks.
+              </p>
             </div>
 
-            <div className="lg:col-span-7">
-              <TasksView
-                selectedGoal={selectedGoal}
-                tasks={tasks}
-                onCreateTask={handleCreateTask}
-                onToggleComplete={handleToggleComplete}
-                loading={loadingTasks}
+            <HealthCheck />
+
+            <section>
+              <AvailabilityView
+                availabilities={availabilities}
+                onCreate={handleCreateAvailability}
+                onUpdate={handleUpdateAvailability}
+                onDelete={handleDeleteAvailability}
+                loading={loadingAvailabilities}
               />
-            </div>
-          </section>
-        ) : (
-          <section>
-            <AvailabilityView
-              availabilities={availabilities}
-              onCreate={handleCreateAvailability}
-              onUpdate={handleUpdateAvailability}
-              onDelete={handleDeleteAvailability}
-              loading={loadingAvailabilities}
-            />
-          </section>
+            </section>
+          </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
-        MindOS &bull; Modular Monolith &bull; React + TypeScript + FastAPI + PostgreSQL Target
+      {/* Editorial System Footer */}
+      <footer className="border-t border-border/70 py-6 text-center text-xs font-mono text-muted-foreground">
+        MindOS &bull; Attention &amp; Time Operating System &bull; Controlled Chaos &bull; sys.0.1
       </footer>
     </div>
   )

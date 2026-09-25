@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum, CheckConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum, CheckConstraint, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin
@@ -18,6 +18,22 @@ class TaskPriority(str, enum.Enum):
     HIGH = "HIGH"
 
 
+class TaskType(str, enum.Enum):
+    ROUTINE = "ROUTINE"
+    DEEP_WORK = "DEEP_WORK"
+    SHALLOW_WORK = "SHALLOW_WORK"
+    HABIT = "HABIT"
+    DEADLINE_DRIVEN = "DEADLINE_DRIVEN"
+    CREATIVE = "CREATIVE"
+    ADMINISTRATIVE = "ADMINISTRATIVE"
+
+
+class RecurrenceCadence(str, enum.Enum):
+    DAILY = "DAILY"
+    WEEKDAYS = "WEEKDAYS"
+    WEEKLY = "WEEKLY"
+
+
 class Task(Base, TimestampMixin):
     """
     Task entity representing granular execution work.
@@ -31,6 +47,23 @@ class Task(Base, TimestampMixin):
     description = Column(Text, nullable=True)
     status = Column(Enum(TaskStatus, name="task_status"), default=TaskStatus.TODO, nullable=False, index=True)
     priority = Column(Enum(TaskPriority, name="task_priority"), default=TaskPriority.MEDIUM, nullable=False)
+    task_type = Column(
+        Enum(TaskType, name="task_type"),
+        default=TaskType.SHALLOW_WORK,
+        server_default="SHALLOW_WORK",
+        nullable=False,
+        index=True,
+    )
+    is_recurring = Column(
+        Boolean,
+        default=False,
+        server_default="false",
+        nullable=False,
+    )
+    recurrence_cadence = Column(
+        Enum(RecurrenceCadence, name="recurrence_cadence"),
+        nullable=True,
+    )
     estimated_minutes = Column(Integer, nullable=True)
     deadline = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
@@ -42,3 +75,4 @@ class Task(Base, TimestampMixin):
 
     # Relationships
     goal = relationship("Goal", back_populates="tasks")
+    schedule_blocks = relationship("ScheduleBlock", back_populates="task", cascade="all, delete-orphan")

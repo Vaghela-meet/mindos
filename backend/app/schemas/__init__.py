@@ -9,6 +9,16 @@ from app.schemas.availability import (
     AvailabilityUpdate,
     AvailabilityResponse,
 )
+from app.schemas.plan import (
+    PlannerPolicy,
+    ShortfallRecord,
+    ShortfallReport,
+    ScheduleBlockBase,
+    ScheduleBlockResponse,
+    DailyPlanBase,
+    DailyPlanResponse,
+    PlanGenerationRequest,
+)
 
 __all__ = [
     "HealthCheckResponse",
@@ -25,4 +35,12 @@ __all__ = [
     "AvailabilityCreate",
     "AvailabilityUpdate",
     "AvailabilityResponse",
+    "PlannerPolicy",
+    "ShortfallRecord",
+    "ShortfallReport",
+    "ScheduleBlockBase",
+    "ScheduleBlockResponse",
+    "DailyPlanBase",
+    "DailyPlanResponse",
+    "PlanGenerationRequest",
 ]

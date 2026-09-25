@@ -21,3 +21,5 @@ class User(Base, TimestampMixin):
     goals = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     # Relationship: 1 User -> Many Availabilities
     availabilities = relationship("Availability", back_populates="user", cascade="all, delete-orphan")
+    # Relationship: 1 User -> Many DailyPlans
+    daily_plans = relationship("DailyPlan", back_populates="user", cascade="all, delete-orphan")

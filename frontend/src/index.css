@@ -4,25 +4,80 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 7%;
-    --card-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --radius: 0.5rem;
+    /* LIGHT MODE: Warm paper-like background, near-black ink, muted graphite, terracotta accent */
+    --background: 40 25% 97%;
+    --foreground: 30 10% 10%;
+    --surface: 38 20% 95%;
+    --surface-muted: 38 18% 92%;
+    --card: 38 20% 95%;
+    --card-foreground: 30 10% 10%;
+    --secondary: 38 18% 92%;
+    --secondary-foreground: 30 10% 12%;
+    --muted: 36 12% 90%;
+    --muted-foreground: 30 4% 44%;
+    --border: 35 12% 86%;
+    --border-subtle: 35 10% 91%;
+    --accent: 14 78% 50%;
+    --accent-muted: 14 55% 90%;
+    --accent-foreground: 0 0% 100%;
+    --primary: 14 78% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Semantic Status Tokens */
+    --status-attention: 38 92% 48%;
+    --status-risk: 0 75% 50%;
+    --status-healthy: 142 65% 36%;
+    --status-adaptation: 217 91% 55%;
+
+    --radius: 0.25rem;
+  }
+
+  .dark {
+    /* DARK MODE: Charcoal near-black background, soft warm-white text, graphite secondary */
+    --background: 220 10% 7%;
+    --foreground: 40 20% 94%;
+    --surface: 220 8% 10%;
+    --surface-muted: 220 8% 12%;
+    --card: 220 8% 10%;
+    --card-foreground: 40 20% 94%;
+    --secondary: 220 8% 12%;
+    --secondary-foreground: 40 15% 90%;
+    --muted: 220 7% 15%;
+    --muted-foreground: 220 6% 56%;
+    --border: 220 8% 16%;
+    --border-subtle: 220 7% 12%;
+    --accent: 14 80% 54%;
+    --accent-muted: 14 40% 20%;
+    --accent-foreground: 0 0% 100%;
+    --primary: 14 80% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Semantic Status Tokens */
+    --status-attention: 38 92% 52%;
+    --status-risk: 0 72% 55%;
+    --status-healthy: 142 60% 45%;
+    --status-adaptation: 217 91% 60%;
+
+    --radius: 0.25rem;
   }
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Geist', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

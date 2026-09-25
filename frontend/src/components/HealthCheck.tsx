@@ -45,11 +45,11 @@ export const HealthCheck: React.FC = () => {
   }, [])
 
   return (
-    <Card className="border-slate-800 bg-slate-900/70">
+    <Card className="border-border bg-card">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="flex items-center space-x-2">
-            <Server className="h-5 w-5 text-blue-400" />
+            <Server className="h-4 w-4 text-accent" />
             <span>Backend Integration Status</span>
           </CardTitle>
           <CardDescription>
@@ -68,22 +68,22 @@ export const HealthCheck: React.FC = () => {
         </Button>
       </CardHeader>
 
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="space-y-4 pt-2">
         {loading && (
-          <div className="flex items-center space-x-2 text-slate-400">
-            <RefreshCw className="h-4 w-4 animate-spin text-blue-400" />
+          <div className="flex items-center space-x-2 text-muted-foreground">
+            <RefreshCw className="h-4 w-4 animate-spin text-accent" />
             <span>Checking endpoint `/api/v1/health`...</span>
           </div>
         )}
 
         {error && !loading && (
-          <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4 text-amber-300">
+          <div className="rounded-sm border border-status-attention/30 bg-status-attention/10 p-3 text-status-attention">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />
+              <AlertTriangle className="h-4 w-4 text-status-attention flex-shrink-0" />
               <div>
-                <p className="font-semibold text-sm">Backend Service Offline or Unreachable</p>
-                <p className="text-xs text-amber-200/80 mt-1">
-                  Start the backend with <code className="bg-amber-950/60 px-1 py-0.5 rounded text-white">uvicorn app.main:app --port 8000</code> to view live telemetry.
+                <p className="font-semibold text-xs">Backend Service Offline or Unreachable</p>
+                <p className="text-[11px] text-foreground/80 mt-0.5">
+                  Start the backend with <code className="bg-secondary px-1 py-0.5 rounded-sm font-mono text-[11px] text-foreground">uvicorn app.main:app --port 8000</code> to view live telemetry.
                 </p>
               </div>
             </div>
@@ -91,38 +91,39 @@ export const HealthCheck: React.FC = () => {
         )}
 
         {data && !loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-sm border border-border bg-secondary/30 p-3 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 uppercase tracking-wider">FastAPI Core</span>
-                <Badge variant="success" className="flex items-center space-x-1">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">FastAPI Core</span>
+                <Badge variant="healthy" className="flex items-center space-x-1 text-[10px]">
                   <CheckCircle2 className="h-3 w-3" />
                   <span>{data.status.toUpperCase()}</span>
                 </Badge>
               </div>
-              <div className="text-xs text-slate-300 space-y-1">
-                <div>Application: <span className="font-medium text-white">{data.app}</span></div>
-                <div>Version: <span className="font-mono text-white">{data.version}</span></div>
-                <div>Environment: <span className="font-medium text-white">{data.environment}</span></div>
+              <div className="text-xs text-foreground/80 space-y-0.5">
+                <div>Application: <span className="font-medium text-foreground">{data.app}</span></div>
+                <div>Version: <span className="font-mono text-foreground">{data.version}</span></div>
+                <div>Environment: <span className="font-medium text-foreground">{data.environment}</span></div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4 space-y-2">
+            <div className="rounded-sm border border-border bg-secondary/30 p-3 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400 uppercase tracking-wider flex items-center space-x-1">
-                  <Database className="h-3.5 w-3.5 text-blue-400" />
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider flex items-center space-x-1">
+                  <Database className="h-3 w-3 text-accent" />
                   <span>Database Layer</span>
                 </span>
                 <Badge
-                  variant={data.database.status === 'connected' ? 'success' : 'warning'}
+                  variant={data.database.status === 'connected' ? 'healthy' : 'attention'}
+                  className="text-[10px]"
                 >
                   {data.database.status.toUpperCase()}
                 </Badge>
               </div>
-              <div className="text-xs text-slate-300 space-y-1">
-                <div>Engine: <span className="font-medium text-white capitalize">{data.database.database}</span></div>
+              <div className="text-xs text-foreground/80 space-y-0.5">
+                <div>Engine: <span className="font-medium text-foreground capitalize">{data.database.database}</span></div>
                 {data.database.detail && (
-                  <div className="text-xs text-amber-400/90">{data.database.detail}</div>
+                  <div className="text-xs text-status-attention">{data.database.detail}</div>
                 )}
               </div>
             </div>

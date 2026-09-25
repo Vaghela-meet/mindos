@@ -28,3 +28,15 @@ class AvailabilityValidationException(DomainException):
 
 class AvailabilityConflictException(DomainException):
     pass
+
+
+class PlanNotFoundException(DomainException):
+    pass
+
+
+class PlanInvariantViolationException(DomainException):
+    pass
+
+
+class PlanningValidationException(DomainException):
+    pass

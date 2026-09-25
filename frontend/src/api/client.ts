@@ -1,4 +1,4 @@
-import { Goal, Task, GoalPriority, TaskPriority, Availability, DayOfWeek } from '@/types/domain'
+import { Goal, Task, GoalPriority, TaskPriority, Availability, DayOfWeek, DailyPlan } from '@/types/domain'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
@@ -113,4 +113,37 @@ export async function deleteAvailability(id: number): Promise<void> {
     method: 'DELETE',
   })
   if (!res.ok) throw new Error(await parseError(res, 'Failed to delete availability'))
+}
+
+export async function getTodayPlan(): Promise<DailyPlan | null> {
+  const res = await fetch(`${API_BASE}/plans/today`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(await parseError(res, 'Failed to fetch today plan'))
+  return res.json()
+}
+
+export async function getDailyPlanByDate(date: string): Promise<DailyPlan | null> {
+  const res = await fetch(`${API_BASE}/plans/daily/${date}`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(await parseError(res, `Failed to fetch plan for ${date}`))
+  return res.json()
+}
+
+export async function generateDailyPlan(payload?: {
+  plan_date?: string
+  policy?: any
+}): Promise<DailyPlan> {
+  const res = await fetch(`${API_BASE}/plans/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload || {}),
+  })
+  if (!res.ok) throw new Error(await parseError(res, 'Failed to generate daily plan'))
+  return res.json()
+}
+
+export async function getPlanById(id: number): Promise<DailyPlan> {
+  const res = await fetch(`${API_BASE}/plans/${id}`)
+  if (!res.ok) throw new Error(await parseError(res, `Failed to fetch plan ${id}`))
+  return res.json()
 }

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from app.models.task import TaskStatus, TaskPriority
+from app.models.task import TaskStatus, TaskPriority, TaskType, RecurrenceCadence
 
 
 class TaskBase(BaseModel):
@@ -9,6 +9,9 @@ class TaskBase(BaseModel):
     description: Optional[str] = Field(None, description="Detailed description")
     status: TaskStatus = Field(default=TaskStatus.TODO, description="Current lifecycle state")
     priority: TaskPriority = Field(default=TaskPriority.MEDIUM, description="Importance level")
+    task_type: TaskType = Field(default=TaskType.SHALLOW_WORK, description="Cognitive modality of work")
+    is_recurring: bool = Field(default=False, description="Whether this task recurs")
+    recurrence_cadence: Optional[RecurrenceCadence] = Field(None, description="Cadence if recurring")
     estimated_minutes: Optional[int] = Field(None, description="Estimated duration in minutes (> 0)")
     deadline: Optional[datetime] = Field(None, description="Due date and time")
     completed_at: Optional[datetime] = Field(None, description="Timestamp when task was marked completed")
@@ -38,6 +41,9 @@ class TaskUpdate(BaseModel):
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
+    task_type: Optional[TaskType] = None
+    is_recurring: Optional[bool] = None
+    recurrence_cadence: Optional[RecurrenceCadence] = None
     estimated_minutes: Optional[int] = None
     deadline: Optional[datetime] = None
     completed_at: Optional[datetime] = None
